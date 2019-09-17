@@ -1,0 +1,65 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.css"
+    rel="stylesheet" type="text/css">
+<link
+    href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.css"
+    rel="stylesheet" type="text/css">
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+{{script}}
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <div class="data">
+
+        <ul>
+            <li><h3> {{protein_id}} </h3></li>
+            <li><h3> {{protein_desc}} </h3></li>
+        </ul>
+
+        <table style="width:20%">
+            <tr>
+                <th align="left">Half Life</th>
+                <th align="left">Residual</th>
+
+            </tr>
+            <tr>
+                <td >
+                    <div  id="field_name_1"> {{start_hl}} </div>
+                </td>
+
+                <td>
+                    <div  id="field_name_2"> {{start_r}} </div>
+                </td>
+
+
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div class="row">
+        <div id="plot">
+         {{div}}
+        </div>
+
+
+
+
+
+
+    </div>
+
+
+</div>
+
+</body>
+</html>

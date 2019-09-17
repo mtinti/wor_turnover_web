@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .loader {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url('/static/loader.gif') 50% 50% no-repeat rgb(249,249,249);
+        }
+    </style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Complex Explorer</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/t/dt/jq-2.2.0,jszip-2.5.0,pdfmake-0.1.18,dt-1.10.11,af-2.1.1,b-1.1.2,b-colvis-1.1.2,b-flash-1.1.2,b-html5-1.1.2,b-print-1.1.2,cr-1.3.1,fc-3.2.1,fh-3.1.1,kt-2.1.1,r-2.0.2,rr-1.1.1,sc-1.4.1,se-1.1.2/datatables.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/c3.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/t/dt/jq-2.2.0,jszip-2.5.0,pdfmake-0.1.18,dt-1.10.11,af-2.1.1,b-1.1.2,b-colvis-1.1.2,b-flash-1.1.2,b-html5-1.1.2,b-print-1.1.2,cr-1.3.1,fc-3.2.1,fh-3.1.1,kt-2.1.1,r-2.0.2,rr-1.1.1,sc-1.4.1,se-1.1.2/datatables.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(window).load(function() {
+            $(".loader").fadeOut("slow");
+        })
+    </script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.15/dataRender/ellipsis.js"></script>
+    <script type='text/javascript' src="/static/js/d3.min.js"></script>
+    <script type='text/javascript' src="/static/js/d3.tip.v0.6.3.js"></script>
+    <script type="text/javascript" src="/static/js/c3.js"></script>
+    <script type="text/javascript" src="/static/js/d3-save-svg.min.js"></script>
+
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
+<div class="loader"></div>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <a class="navbar-brand" href="#">Top navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Disabled</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div >
+        <div class="row" id="plots">
+            <section class="col-md-6" id="bsf_plot">
+                <div class="jumbotron">
+                    <div id="chart_bsf">
+                    </div>
+
+                </div>
+            </section>
+            <section class="col-md-6" id="pcf_plot">
+                <div class="jumbotron">
+                    <div id="chart_pcf">
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="jumbotron">
+        <div class="row" id="res_table">
+
+            <class class="col-md-12">
+                <table id="main_table" class="display" cellspacing="0" style="width:100%">
+
+                    <thead>
+                    <tr>
+                        <th>Protein Group Id</th>
+                        <th>Description</th>
+                        <th>N0 BSF</th>
+                        <th>tau BSF</th>
+                        <th>offset BSF</th>
+                        <th>half life BSF</th>
+                        <th>N0 PCF</th>
+                        <th>tau PCF</th>
+                        <th>offset PCF</th>
+                        <th>half life PCF</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Protein Group Id</th>
+                        <th>Description</th>
+                        <th>N0 BSF</th>
+                        <th>tau BSF</th>
+                        <th>offset BSF</th>
+                        <th>half life BSF</th>
+                        <th>N0 PCF</th>
+                        <th>tau PCF</th>
+                        <th>offset PCF</th>
+                        <th>half life PCF</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for item in table %}
+                    <tr>
+                        <td class="prot_group_id" id="{{item.ProteinGroupId}}">{{item.ProteinGroupId}}</td>
+                        <td>{{item.Description}}</td>
+                        <td>{{item.N0BSF}}</td>
+                        <td>{{item.tauBSF}}</td>
+                        <td>{{item.offsetBSF}}</td>
+                        <td>{{item.halfLifeBSF}}</td>
+                        <td>{{item.N0PCF}}</td>
+                        <td>{{item.tauPCF}}</td>
+                        <td>{{item.offsetPCF}}</td>
+                        <td>{{item.halfLifePCF}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </class>
+
+        </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function make_chart(bindto, in_data){
+        var chart = c3.generate({
+            bindto: bindto,
+            data: {
+                xs: {
+                    data_1: 'x_point',
+                    data_2: 'x_point',
+                    data_3: 'x_point',
+                    y_fit: 'x_fit'
+                },
+                // iris data from R
+                columns: [
+                    in_data.data_1,
+                    in_data.data_2,
+                    in_data.data_3,
+                    in_data.x_point,
+                    in_data.y_fit,
+                    in_data.x_fit,
+                ],
+                type: 'scatter',
+                types: {
+                    y_fit: 'spline',
+                },
+            },
+
+            point: {
+                show: false
+            },
+            axis: {
+                x: {
+                    label: 'time',
+                    tick: {
+                        fit: false
+                    },
+                    padding: {top:0, bottom:0},
+                },
+                y : {
+                    max: 1,
+                    min: 0,
+                    tick: {
+                        format: function (d) { return d3.format('.2f')(d); }
+                    },
+                    padding: {top:5, bottom:0}
+                }
+            }
+        });
+
+        return chart;
+
+    };
+
+
+    $(document).ready(function() {
+        console.log('test data table');
+        //Setup - add a text input to each footer cell
+        $('#main_table tfoot th').each( function () {
+            var title = $(this).text();
+            var array_title = title.split(" ")
+            var placeholder = array_title[array_title.length-1]
+            $(this).html( '<input type="text" placeholder="'+placeholder+'" />' );
+        } );
+
+        // DataTable
+        var table = $('#main_table').DataTable({
+            bautoWidth: false,
+
+            dom: 'Bfrtip',
+            lengthMenu: [
+                [ 5, 10, 25, 50, -1 ],
+                [ '5 rows', '10 rows', '25 rows', '50 rows', 'Show all' ]
+            ],
+            buttons: [ 'pageLength','copy', 'excel', 'csv' ],
+
+            columnDefs: [
+                {targets: 0, render: $.fn.dataTable.render.ellipsis( 17, true ), width: "5%"},
+                {targets: 1, render: $.fn.dataTable.render.ellipsis( 17, true ), width: "5%"},
+                {targets: 2, width: "5%"},
+                {targets: 3, width: "5%"},
+                {targets: 4, width: "5%"},
+                {targets: 5, width: "5%"},
+                {targets: 6, width: "5%"},
+                {targets: 7, width: "5%"},
+                {targets: 8, width: "5%"},
+                {targets: 9, width: "5%"},
+            ],
+
+            "columns": [
+                { "data": "Protein Group Id"},
+                { "data": "Description" },
+                { "data": "N0 BSF" },
+                { "data": "tau BSF" },
+                { "data": "offset BSF" },
+                { "data": "half life BSF" },
+                { "data": "N0 PCF" },
+                { "data": "tau PCF" },
+                { "data": "offset PCF" },
+                { "data": "half life PCF" },
+
+            ],
+
+            "bInfo": false,
+            "scrollX": true,
+
+            //buttons: ['copy', 'excel', 'csv'],
+            //pageLength: 4,
+
+        });
+        //console.log('columns', table.columns())
+        table.columns().every(function () {
+            $('input', this.footer()).on('keyup change', function () {
+                table.column($(this).parent().index() + ':visible')
+                        .search(this.value)
+                        .draw();
+
+            });
+        });
+
+
+        d3.json('/get_data/'+'Tb05.5K5.210;Tb927.5.4570', function(error, in_data) {
+            console.log(in_data,'this is data');
+            //console.log(in_data.bsf.x,'bsf_x');
+            chart_bsf = make_chart('#chart_bsf', in_data.bsf);
+            chart_pcf = make_chart('#chart_pcf', in_data.pcf);
+
+        });
+
+
+    } );
+
+
+    $('#example').dataTable( {
+        "initComplete": function( settings, json ) {
+            $('div.loading').remove();
+        }
+    } );
+
+
+
+    $("#res_table .prot_group_id").on("click",  function () {
+        var id = $(this).attr("id");
+        console.log(id);
+        d3.json('/get_data/'+id, function(error, in_data) {
+            console.log(in_data,'this is data');
+            //console.log(in_data.bsf.x,'bsf_x');
+            chart_bsf = make_chart('#chart_bsf', in_data.bsf);
+            chart_pcf = make_chart('#chart_pcf', in_data.pcf);
+
+        });
+        //alert(id);
+    });
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
+

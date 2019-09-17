@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <style>
+        .loader {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url('/static/loader.gif') 50% 50% no-repeat rgb(249,249,249);
+        }
+
+    </style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Turnover</title>
+    <link rel="stylesheet" href="/static/css/c3.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/t/dt/jq-2.2.0,jszip-2.5.0,pdfmake-0.1.18,dt-1.10.11,af-2.1.1,b-1.1.2,b-colvis-1.1.2,b-flash-1.1.2,b-html5-1.1.2,b-print-1.1.2,cr-1.3.1,fc-3.2.1,fh-3.1.1,kt-2.1.1,r-2.0.2,rr-1.1.1,sc-1.4.1,se-1.1.2/datatables.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+
+
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/t/dt/jq-2.2.0,jszip-2.5.0,pdfmake-0.1.18,dt-1.10.11,af-2.1.1,b-1.1.2,b-colvis-1.1.2,b-flash-1.1.2,b-html5-1.1.2,b-print-1.1.2,cr-1.3.1,fc-3.2.1,fh-3.1.1,kt-2.1.1,r-2.0.2,rr-1.1.1,sc-1.4.1,se-1.1.2/datatables.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $(window).load(function() {
+            $(".loader").fadeOut("slow");
+        })
+    </script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.15/dataRender/ellipsis.js"></script>
+    <script type='text/javascript' src="/static/js/d3.min.js"></script>
+    <script type='text/javascript' src="/static/js/d3.tip.v0.6.3.js"></script>
+    <script type="text/javascript" src="/static/js/c3.js"></script>
+    <script type="text/javascript" src="/static/js/d3-save-svg.min.js"></script>
+
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
+<div class="loader"></div>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <a class="navbar-brand" href="#">Top navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/turnover">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/multi_plot">Multi Plot</a>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div>
+        <div class="row">
+            <div class="col-md-5">
+                <!-- <input id='test_1' type="checkbox"> -->
+                <div id="table_blok">
+                    <h2>Selection Table</h2>
+                    <!--
+                    <button id="addSelected">add search</button>
+                    <button id="cleanSelected">remove search</button>
+                     -->
+                    <table id="main_table" class="display">
+
+                        <thead>
+                        <tr>
+
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th></th>
+                            <th>BSF</th>
+                            <th>PCF</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>Id</th>
+                            <th>Description</th>
+                            <th></th>
+                            <th>BSF</th>
+                            <th>PCF</th>
+                        </tr>
+                        </tfoot>
+
+                        <tbody>
+                        {% for item in table %}
+                        <tr>
+                            <td class="prot_group_id" id="{{item.ProteinGroupId}}">{{item.ProteinGroupId}}</td>
+                            <td>{{item.Description}}</td>
+                            <td ><input id="checkbox_{{item.ProteinGroupId}}", type="checkbox" value="False"  name="select" class="selection_box" selected_id="{{item.ProteinGroupId}}" /> </td>
+                            <td>{{item.BSF_r}}</td>
+                            <td>{{item.PCF_r}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-7" data-spy="affix-top">
+                <div id="LoadingImage" style="display:none">
+                    <h2>loading...</h2>
+                </div>
+                <div id="UnLoadingImage" style="display:none">
+                    <h2>Unloading...</h2>
+                </div>
+
+                <h2>Plots</h2>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3>BSF</h3>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button class="btn expand_button" type="button" data-toggle="collapse" data-target="#collapse_bsf" aria-expanded="false" aria-controls="collapse_bsf" style="float: left;">-</button>
+                                        <button class="btn" type="button" style="float: right;" onclick="d3_save_svg.save(d3.select('#chart_bsf svg').node(),{filename: 'BSF',} )">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-block collapse show" id="collapse_bsf" >
+                                <br>
+                                <div id="chart_bsf"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3>PCF</h3>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button class="btn expand_button" type="button" data-toggle="collapse" data-target="#collapse_pcf" aria-expanded="false" aria-controls="collapse_bsf" style="float: left;">-</button>
+                                        <button class="btn" type="button" style="float: right;" onclick="d3_save_svg.save(d3.select('#chart_bsf svg').node(),{filename: 'PCF',} )">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-block collapse show" id="collapse_pcf">
+                                <br>
+                                <div id="chart_pcf"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <br>
+                        <h2>Legend Table</h2>
+                        <div id="legend_table">
+                        </div>
+
+                        <div id="peptide_legend_block">
+                            <div id="peptide_legend">
+                            </div>
+                        </div>
+
+                        <table id="dinamic_legend_table" class="display">
+                            <thead>
+                            <tr>
+
+                                <th>Id</th>
+                                <th>Description</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th>Id</th>
+                                <th>Description</th>
+                                <th ></th>
+                            </tr>
+                            </tfoot>
+                            <tbody>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+        </div>
+
+
+    </div>
+</div>
+
+
+<script type="application/json" id="mis">
+
+ {{ all_protein_data | safe }}
+
+</script><!-- jeson graph -->
+
+<script>
+    $(document).ready(function() {
+
+        var mis = document.getElementById('mis').innerHTML;
+        var all_data = JSON.parse(mis);
+        console.log(all_data, 'all_data');
+        //var all_data = {};
+        //all_data['Tb10.v4.0041;Tb927.10.4510'] = [];
+
+
+
+        console.log(all_data['Tb10.v4.0041'],'all data test');
+
+        function make_chart(bindto, in_data){
+        var protein_id = in_data.request_prot;
+
+        temp = in_data.y_fit;
+        console.log(in_data, 'in_data');
+        temp[0] = protein_id;
+        in_data.y_fit = temp;
+
+        var chart = c3.generate({
+
+            tooltip: {
+                position: function () {
+                    var position = c3.chart.internal.fn.tooltipPosition.apply(this, arguments);
+                    position.top = 0;
+                    return position;
+                },
+
+                grouped: false,
+
+                format: {
+                    title: function (d) {return 'hour ' + d;}
+                    //value: function (value, ratio, id) {console.log(value, ratio, id); return value;},
+                    },
+
+                contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+
+                    d.forEach(function(element, index, array) {
+                        //d[index].id = d[index].id.split(';')[0];
+                        d[index]['name']=d[index]['name'].split(';')[0];
+                        //console.log(d[index]);
+                    });
+
+                    return this.getTooltipContent(d, defaultTitleFormat, defaultValueFormat, color);
+                    }
+
+//            value: d3.format(',') // apply this format to both y and y2
+
+            },
+
+            bindto: bindto,
+
+            legend: {
+                show: false
+            },
+
+            data: {
+
+                x: 'x_fit',
+                // iris data from R
+                columns: [
+                    in_data.x_fit,
+                    in_data.y_fit,
+                ],
+                type: 'spline',
+
+                selection: {
+                    grouped: true
+                }
+
+
+
+
+            },
+
+            point: {
+                show: true
+            },
+
+            axis: {
+                x: {
+                    label: 'time',
+                    tick: {
+                        fit: true
+                    },
+                    padding: {top:0, bottom:0},
+                },
+                y : {
+                    max: 1,
+                    min: 0,
+                    tick: {
+                        format: function (d) { return d3.format('.2f')(d); }
+                    },
+                    padding: {top:5, bottom:0}
+                }
+            }
+        });
+
+        return chart;
+
+    };
+
+        function add_plot(id, chart_bsf, chart_pcf ){
+        //d3.json('/get_data/'+id, function(error, in_data) {
+            //console.log(in_data,'this is data');
+            //console.log(in_data.bsf.x_point,'bsf_x');
+            console.log(id, 'inside add_plot');
+            in_data = all_data[id];
+
+            //if (typeof myVar !== 'undefined') {
+                console.log(in_data);
+                temp = in_data.bsf.y_fit;
+                //console.log(temp[0], id);
+                temp[0] = id;
+                in_data.bsf.y_fit = temp;
+
+                temp = in_data.pcf.y_fit;
+                temp[0] = id;
+                in_data.pcf.y_fit = temp;
+
+
+                if (in_data.bsf.y_fit.length > 2) {
+
+                    chart_bsf.load({
+                        columns: [
+                            in_data.bsf.y_fit,
+                            in_data.bsf.x_fit,
+                        ]
+                    });
+                }
+
+                if (in_data.pcf.y_fit.length > 2) {
+                    chart_pcf.load({
+                        columns: [
+                            in_data.pcf.y_fit,
+                            in_data.pcf.x_fit,
+                        ]
+                    });
+                }
+
+                if (in_data.bsf.y_fit.length > 2) {
+                    if (in_data.pcf.y_fit.length > 2) {
+
+                        var temp_dict = {}
+                        temp_dict[id] = chart_bsf.color(id)
+                        chart_pcf.data.colors(temp_dict);
+                        console.log(chart_bsf.color(id), 'chart_bsf.color(id)');
+                        console.log('need to uniform color');
+                        ;
+                    }
+                }
+
+            //}
+    };
+        //mod before
+
+
+
+
+
+
+        function remove_plot(id, chart_bsf, chart_pcf){
+        //console.log(id,'id to remove');
+        chart_bsf.unload({
+            ids: id,
+        });
+        chart_pcf.unload({
+            ids: id,
+        });
+
+
+    }
+
+        function add_legend(id, chart){
+
+            var row = document.getElementById('protein_'+id);
+
+            if (row) {console.log('is proesent');}
+            else {
+                var addId = $('#dinamic_legend_table').dataTable().fnAddData([
+                    id,
+                    all_data[id]['desc'],
+                    '<div style="background-color: ' + chart[0].color(id) + '">.</div>'
+                ]);
+                var theNode = $('#dinamic_legend_table').dataTable().fnSettings().aoData[addId[0]].nTr;
+                //console.log(theNode);
+                theNode.setAttribute('id', 'protein_' + id);
+            }
+    };
+
+
+
+    //Setup - add a text input to each footer cell
+        $('#main_table tfoot th').each( function () {
+            var title = $(this).text();
+            var array_title = title.split(" ");
+            var placeholder = array_title[array_title.length-1];
+            $(this).html( '<input type="text" placeholder="'+placeholder+'" />' );
+    } );
+
+
+
+        $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+                //console.log(td, i, 'test');
+                console.log( $('input', td).attr('value'), 'test2');
+                if ( $('input', td).attr('value') == 'True'){
+                    return 1;
+                    //console.log('found', i, td);
+                }
+                else {return 0}
+
+                //return $('input', td)[1].checked ? '1' : '0';
+            });
+        }
+
+
+        jQuery.fn.dataTableExt.oSort['numWithNull-asc'] = function(a,b) {
+            var x = parseFloat(a);
+            var y = parseFloat(b);
+            return ((isNaN(y) || x < y) ? -1 : ((isNaN(x) || x > y) ? 1 : 0));
+        };
+        jQuery.fn.dataTableExt.oSort['numWithNull-desc'] = function(a,b) {
+            var x = parseFloat(a);
+            var y = parseFloat(b);
+            return ((isNaN(x) || x < y) ? 1 : ((isNaN(y) || x > y) ? -1 : 0));
+        };
+
+
+        var table = $('#main_table').DataTable({
+            //"row-border": false,
+            "autoWidth": false,
+            //"pagingType": "full",
+            "dom": '<"top"ifilp<"clear">>',
+            "lengthMenu": [[ -1, 20, 25, 50, 100 ], [ 'Show all', '20 rows', '25 rows', '50 rows', '100 rows' ]],
+            //"buttons": [ 'pageLength','copy', 'excel', 'csv' ],
+
+            "columnDefs": [
+                {"targets": 0,  "render": $.fn.dataTable.render.ellipsis( 20 ), "width": "35%"},
+                {"targets": 1,  "render": $.fn.dataTable.render.ellipsis( 20 ), "width": "35%"},
+                {"targets": 2,  "width":  "5px",  "searchable": false, "orderable": true, "orderDataType": "dom-checkbox"},
+                {"targets": 3,  "render": $.fn.dataTable.render.ellipsis( 5 ), "width": "10%", "className": "text-center", type: 'numWithNull' },
+                {"targets": 4,  "render": $.fn.dataTable.render.ellipsis( 5 ), "width": "10%", "className": "text-center", type: 'numWithNull'},
+
+            ],
+            "columns": [
+                { "data": "Protein Id"},
+                { "data": "Desc" },
+                { "data": "Select" },
+                { "data": "BSF" },
+                { "data": "PCF" },
+
+            ],
+
+
+
+        "bInfo": true,
+        "scrollX": true,
+            //"pagingType": "full"
+
+
+    });
+        document.getElementById("main_table_info").outerHTML = "";
+        table.columns().every(function () {
+        $('input', this.footer()).on('keyup change', function () {
+            table.column($(this).parent().index() + ':visible')
+                    .search(this.value)
+                    .draw();
+
+        });
+    });
+        //add listener when all roow tables are visible in dom
+        $('#main_table .selection_box').on('change', function() {
+            if(this.checked) {
+                console.log($(this).attr("selected_id"), 'cheked');
+                var prot_id = $(this).attr("selected_id");
+                console.log('pippo', prot_id);
+
+                add_plot(prot_id, chart_bsf, chart_pcf);
+                add_legend(prot_id, [chart_bsf, chart_pcf] );
+                //console.log(this);
+                this.value = 'True';
+
+            }
+            else{
+                //console.log($(this).attr("selected_id"), 'uncheked');
+                var prot_id = $(this).attr("selected_id");
+                remove_plot(prot_id, chart_bsf, chart_pcf);
+                remove_legend(prot_id);
+                this.value = 'False';
+            }
+        });
+        table.context["0"]._iDisplayLength = 35;
+        table.draw();
+        var table_Setting = table.settings();
+
+
+
+        var legend_table = $('#dinamic_legend_table').DataTable({
+            //Processing": true,
+
+        "columnDefs": [
+            {"targets": 0,  "render": $.fn.dataTable.render.ellipsis( 20 )},
+            {"targets": 1,  "render": $.fn.dataTable.render.ellipsis( 55 )},
+            {"targets": 2,  "width":  "10px", "searchable": false, "orderable": false,}
+        ]
+
+    });
+        legend_table.context["0"]._iDisplayLength = "50000";
+        legend_table.draw();
+        var legend_Settings = legend_table.settings();
+
+
+
+        function remove_legend(id){
+        //$('span[data-id="'+id+'"]').remove();
+            //var row = document.getElementById('protein_'+id);
+            var row = $('tr[id='+'"'+'protein_'+id+'"'+']')
+            //console.log(row, 'this is row');
+        //var table = $('#dinamic_legend_table').DataTable();
+            if (row) {legend_table.row( row ).remove().draw();}
+        }
+
+
+        in_data = all_data['Tb10.v4.0041']
+        //console.log(in_data,'this is data');
+        //console.log(in_data.bsf.x,'bsf_x');
+        //var temp = in_data.bsf.y_fit;
+        var temp = ['Tb10.v4.0041'];
+        var bk_pcf = in_data.pcf.y_fit;
+        var bk_bsf = in_data.bsf.y_fit
+        in_data.bsf.y_fit = temp;
+        in_data.pcf.y_fit = temp;
+        console.log(in_data, 'in_data.up')
+        var chart_bsf = make_chart('#chart_bsf', in_data.bsf);
+        var chart_pcf = make_chart('#chart_pcf', in_data.pcf);
+        in_data.bsf.y_fit = bk_bsf;
+        in_data.pcf.y_fit = bk_pcf;
+        //console.log(table,'tab');
+
+        function selectOnlyFiltered(){
+
+            legend_Settings[0]._iDisplayLength = legend_Settings[0].fnRecordsTotal();
+            legend_table.draw();
+
+            table_Setting[0]._iDisplayLength = table_Setting[0].fnRecordsTotal();
+            table.draw();
+
+            function plot(){
+
+                var filteredRows = table.rows({filter: 'applied'});
+                //console.log(filteredRows,'filteredRows');
+                //console.log(filteredRows[0].length,'filteredRows.length');
+                if (filteredRows[0].length > 150) {
+                    alert('too many');
+                } else {
+                    filteredRows.every(function (rowIdx, tableLoop, rowLoop) {
+                        var data = this.data();
+                        console.log(data, 'data');
+                        //$(this).attr("cheked", true);
+
+                        //$("#checkbox_"+data['Protein Group Id']).prop('checked', true);
+                        //console.log($("#checkbox_"+data['Protein Group Id']));
+                        //this.setAttribute("checked ", true);
+                        // ... do something with data(), or this.node(), etc
+                        add_plot(data['Protein Group Id'], chart_bsf, chart_pcf);
+                        add_legend(data['Protein Group Id'], [chart_bsf, chart_pcf]);
+                        $('input[id='+'"'+'checkbox_'+data['Protein Group Id']+'"'+']').prop('checked', true);
+                        $('input[id='+'"'+'checkbox_'+data['Protein Group Id']+'"'+']').prop('value', 'True');
+                        //$('input[id="checkbox_Tb05.5K5.210;Tb927.5.4570"]').removeAttr('checked');
+                    });
+                }
+            }
+
+            document.getElementById("LoadingImage").style.display = "block";
+
+            setTimeout(function() {
+                plot();
+                //$(".loader").hide();
+                document.getElementById("LoadingImage").style.display = "none";
+                legend_Settings[0]._iDisplayLength=10;
+                legend_table.draw();
+
+                table_Setting[0]._iDisplayLength=35;
+                table.draw();
+
+            }, 0);
+
+        };
+
+        function removeOnlyFiltered(){
+
+            legend_Settings[0]._iDisplayLength = legend_Settings[0].fnRecordsTotal();
+            legend_table.draw();
+
+            table_Setting[0]._iDisplayLength = table_Setting[0].fnRecordsTotal();
+            table.draw();
+
+            function unplot() {
+
+
+
+                var filteredRows = table.rows({filter: 'applied'});
+                //console.log(filteredRows, 'filteredRows');
+                if (filteredRows[0].length > 150) {
+                    alert('too many');
+                } else {
+                    filteredRows.every(function (rowIdx, tableLoop, rowLoop) {
+                        var data = this.data();
+                        //console.log(data,'data')
+                        // ... do something with data(), or this.node(), etc
+                        remove_plot(data['Protein Group Id'], chart_bsf, chart_pcf);
+                        remove_legend(data['Protein Group Id'], [chart_bsf, chart_pcf]);
+                        $('input[id='+'"'+'checkbox_'+data['Protein Group Id']+'"'+']').removeAttr('checked');
+                        $('input[id='+'"'+'checkbox_'+data['Protein Group Id']+'"'+']').prop('value', 'False');
+                    });
+                }
+
+
+            }
+
+            document.getElementById("UnLoadingImage").style.display = "block";
+
+            setTimeout(function() {
+                unplot();
+                document.getElementById("UnLoadingImage").style.display = "none";
+                legend_Settings[0]._iDisplayLength=10;
+                legend_table.draw();
+
+                table_Setting[0]._iDisplayLength=35;
+                table.draw();
+
+
+            }, 0);
+
+
+        };
+
+
+        $("#addSelected").click(function ()
+        {
+            var test = $('<button/>',
+                    {
+                        //html: 'Test',
+                        onclick: function () { selectOnlyFiltered(); }
+                    });
+            //console.log(test,'test');
+        });
+
+
+        $("#cleanSelected").click(function ()
+        {
+            var test = $('<button/>',
+                    {
+                        //html: 'Test',
+                        onclick: function () { removeOnlyFiltered(); }
+                    });
+            //console.log(test,'test');
+        });
+
+        $('#dinamic_legend_table').on("mouseover", "tr[role='row']", function(){
+
+            var res = $(this).children('td:first-child')[0].outerHTML;
+            if (res.indexOf('title="') !== -1){
+                var id = res.split('title="')[1].split('">')[0];
+            }
+            else {
+                var id = res.split('sorting_1">')[1].split('<')[0];
+
+            }
+            chart_bsf.focus(id);
+            chart_pcf.focus(id);
+
+
+        }).on('mouseout', function (id) {
+            chart_bsf.revert();
+            chart_pcf.revert();
+        });
+
+
+
+
+        //$('#'+'test_1').prop('checked', true);
+        //$('input[id="checkbox_Tb05.5K5.210;Tb927.5.4570"]').prop('checked', true);
+        //$('input[id="checkbox_Tb05.5K5.210;Tb927.5.4570"]').removeAttr('checked');
+        //console.log($('input[id="checkbox_Tb05.5K5.210;Tb927.5.4570"]'),'qqqqqqqqqqqqqqq');
+
+
+
+    });
+
+    $('.expand_button').click(function(){ //you can give id or class name here for $('button')
+        $(this).text(function(i,old){
+            return old=='+' ?  '-' : '+';
+        });
+    });
+
+            //.prop('checked', true);
+    //$('#checkbox_Tb05\\.5K5\\.210\\;Tb927\\.5\\.4570').prop('checked', true);
+
+    //var selectedTd = $('#'+'checkbox_Tb05.5K5.210;Tb927.5.4570');
+    //console.log(selectedTd,'selectedTd')
+
+
+
+
+
+</script>
+
+<style>
+
+    .c3-circle {
+        stroke-width: 1px;
+        stroke: #fff;
+    }
+    .dataTables_paginate {
+        display: none;
+    }
+    /*entry length text size changed*/
+    .dataTables_length > label
+    {
+        font-weight:normal !important;
+        font-size:10px !important;
+    }
+    /*filter label text size changed*/
+    .dataTables_filter > label
+    {
+        font-weight:normal !important;
+        font-size:12px !important;
+    }
+
+    /*table data size changed*/
+    #main_table > tbody > tr > td
+    {
+        padding:5px !important;
+        font-size: 12px !important;
+    }
+
+    /*table paging size changed previous / nextt*/
+
+    .dataTables_paginate > span > a
+    {
+        margin-bottom: 0px !important;
+        padding: 5px 10px !important;
+    }
+    /*table paging size changed*/
+    .dataTables_paginate > a
+    {
+        margin-bottom: 0px !important;
+        padding: 2px 10px !important;
+    }
+
+    /*table paging float right*/
+    .dataTables_paginate
+    {
+        text-align:left !important;
+        margin-top: 20px !important;
+    }
+
+    /*fixed sorting arrow 'after'*/
+    table.dataTable thead .sorting-icons:after {
+        content: "\e114";
+        font-weight:lighter;
+        font-size:x-small;
+        display:list-item;
+        list-style:none;
+        margin-left:-1px;
+        border:0px solid white !important;
+        padding:0 !important;
+        line-height:0.5em !important;
+        margin-top:0px !important;
+        background: none !important;
+    }
+    /*fixed sorting arrow 'before'*/
+    table.dataTable thead .sorting-icons:before {
+        content: "\e113";
+        font-weight:lighter;
+        font-size:x-small;
+        display:list-item;
+        list-style:none;
+        margin-left:-0.4px;
+        border:0px solid white !important;
+        padding :0 !important;
+        line-height :0.5em !important;
+        margin-top :0px !important;
+        background: none !important;
+    }
+
+
+
+    /*fixed sorting arrows position*/
+    .sorting-cnt
+    {
+        float:right;
+        margin-right: 10px;
+        display:block;
+    }
+
+    #main_table > tbody > tr > td {
+        white-space: nowrap;
+    }
+    #main_table{
+        table-layout: fixed;
+    }
+
+
+
+
+</style>
+</body>
+</html>
+
